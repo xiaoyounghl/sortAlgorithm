@@ -1,2 +1,2 @@
-# sortAlgorithm
+# SortAlgorithm
 SortAlgorithm For Java
