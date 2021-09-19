@@ -105,12 +105,14 @@ public abstract class BaseSort<E> {
     private boolean compare(E a, E b, int idx) {
         if (idx >= comparators.length)
             throw new IllegalArgumentException("仅初始化(" + comparators.length + ")个排序比较器，输入的比较器序号(" + (idx + 1) + ")超过已有数量");
-        final boolean flag = comparators[idx].compare(a, b) > 0;
-        if (flag) {
-            if (++idx < comparators.length) compare(a, b, idx);
-            else return true;
+        int compare = comparators[idx].compare(a, b);
+        if (compare == 0) {
+            if (++idx < comparators.length) {
+                return compare(a, b, idx);
+            }
+            return true;
         }
-        return false;
+        return compare > 0;
     }
 
     protected boolean gt(E a, E b) {
@@ -161,7 +163,7 @@ public abstract class BaseSort<E> {
     public static <E> void printArs(List<E> list) {
         for (E obj : list) {
             if (null != obj)
-                System.out.print(obj.toString() + ", ");
+                System.out.print(obj.toString() + ", \n");
             else
                 System.out.print("null, ");
         }
