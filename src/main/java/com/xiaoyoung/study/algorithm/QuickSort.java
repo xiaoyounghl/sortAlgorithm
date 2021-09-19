@@ -10,7 +10,7 @@ public class QuickSort<E> extends BaseSort<E> {
         QuickSort<Integer> hs = new QuickSort<>();
         hs.loadComparator(Integer::compareTo).setOrder(true);
         List<Integer> arrays;
-        if (false) {
+        if (true) {
             Integer[] ints = new Integer[]{82, 60, 32, 34, 612, 64, 123, 74, 234, 3, 6, 2, 61, 23, 9, 83};
 //                              ints = new Integer[]{82, 60};
             arrays = Arrays.asList(ints);

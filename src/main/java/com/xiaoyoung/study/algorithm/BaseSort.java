@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * @param <E>
- * @see #orderCompare(Object, Object) 顺序比较器统一比较方法 √
+ * @see #compare(Object, Object) 顺序比较器统一比较方法 √
  * @see #sort() 将数组进行排序 √
  * @see #printArs(List) 输出数组内容 √
  * @see #checkOrder()  检查数组是否按顺序排列 √
@@ -14,15 +14,33 @@ public abstract class BaseSort<E> {
     /**
      * c.compare(a, b) > 0
      *
+     * @param comparators comparators
+     * @return this
+     * @see #compare(Object, Object, int)
+     */
+    public final BaseSort<E> loadComparator(Comparator<? super E>... comparators) {
+        if (comparators == null || comparators.length == 0)
+            throw new IllegalArgumentException("排序比较器 Comparator<? super E> comparator 不存在或为空！");
+        else if (this.comparators == comparators) return this;
+        else {
+            this.comparators = comparators;
+            return this;
+        }
+    }
+
+    /**
+     * c.compare(a, b) > 0
+     *
      * @param comparator c
      * @return this
+     * @see #compare(Object, Object)
      */
-    public BaseSort<E> loadComparator(Comparator<? super E> comparator) {
+    public final BaseSort<E> loadComparator(Comparator<? super E> comparator) {
         if (comparator == null)
             throw new IllegalArgumentException("排序比较器 Comparator<? super E> comparator 不存在或为空！");
-        else if (this.c == comparator) return this;
         else {
-            this.c = comparator;
+            this.comparators = new Comparator[1];
+            this.comparators[0] = comparator;
             return this;
         }
     }
@@ -56,7 +74,7 @@ public abstract class BaseSort<E> {
     }
 
     // 排序比较器
-    protected Comparator<? super E> c;
+    protected Comparator<? super E>[] comparators;
     // 排序方式
     protected boolean asc = true;
     // 待排序数据
@@ -69,7 +87,7 @@ public abstract class BaseSort<E> {
      * 自检 排序比较器和数据是否存在
      */
     protected void baseCheck() {
-        this.loadComparator(this.c);
+        this.loadComparator(this.comparators);
         this.loadArrays(this.arrays);
     }
 
@@ -80,16 +98,27 @@ public abstract class BaseSort<E> {
      * @param b ObjectB
      * @return c.compare(a, b) > 0
      */
-    protected boolean orderCompare(E a, E b) {
-        return c.compare(a, b) > 0;
+    protected boolean compare(E a, E b) {
+        return compare(a, b, 0);
+    }
+
+    private boolean compare(E a, E b, int idx) {
+        if (idx >= comparators.length)
+            throw new IllegalArgumentException("仅初始化(" + comparators.length + ")个排序比较器，输入的比较器序号(" + (idx + 1) + ")超过已有数量");
+        final boolean flag = comparators[idx].compare(a, b) > 0;
+        if (flag) {
+            if (++idx < comparators.length) compare(a, b, idx);
+            else return true;
+        }
+        return false;
     }
 
     protected boolean gt(E a, E b) {
-        return orderCompare(a, b);
+        return compare(a, b);
     }
 
     protected boolean lt(E a, E b) {
-        return orderCompare(b, a);
+        return compare(b, a);
     }
 
     protected boolean notEquals(E a, E b) {
@@ -104,7 +133,7 @@ public abstract class BaseSort<E> {
      * 检查数组是否按顺序排列 √
      *
      * @return 检查结果
-     * @see #orderCompare(Object, Object)
+     * @see #compare(Object, Object)
      */
     public boolean checkOrder() {
         baseCheck();
@@ -116,8 +145,8 @@ public abstract class BaseSort<E> {
             for (int idx = 1; idx < arrays.size(); idx++) {
                 E next = arrays.get(idx);
                 if (equals(curr, next)) continue;
-                if (asc && orderCompare(curr, next)) return false;
-                if (!asc && orderCompare(next, curr)) return false;
+                if (asc && compare(curr, next)) return false;
+                if (!asc && compare(next, curr)) return false;
                 curr = next;
             }
         }
